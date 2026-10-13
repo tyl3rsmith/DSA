@@ -3,7 +3,7 @@ import heapq
 
 from algorithms.topological_sort import topo_sort
 
-class WeightedGraph:
+class Graph:
 
     def __init__(self, vertices, edges, directed=True):
         self.vertices = vertices
@@ -240,7 +240,7 @@ class WeightedGraph:
         return path, dist[end]
 
 
-g = WeightedGraph(
+g = Graph(
     [0, 1, 2, 3, 4],
     [
         (0, 1, 4),
@@ -257,7 +257,7 @@ print(g.bellman_ford(0))
 print(g.dijkstra(0))
 print(g.floyd_warshall()[0][4])
 
-g2 = WeightedGraph(
+g2 = Graph(
     [0, 1, 2],
     [(0, 1, 4), (0, 2, 5), (1, 2, -3)],
     directed=True
@@ -267,7 +267,7 @@ print(g2.bellman_ford(0))
 # print(g2.dijkstra(0))
 print(g2.floyd_warshall()[0][1])
 
-g3 = WeightedGraph(
+g3 = Graph(
     [0, 1, 2, 3],
     [
         (0, 1, 2),
@@ -282,7 +282,7 @@ g3 = WeightedGraph(
 # # print(g3.dijkstra(0)) # gets stuck in endless negative weight cycle
 # print(g3.floyd_warshall())
 
-g4 = WeightedGraph(
+g4 = Graph(
     [0, 1, 2, 3, 4],
     [
         (0, 1, 1),
@@ -296,7 +296,7 @@ g4 = WeightedGraph(
 
 print(g4.bfs_shortest_path(0, 4))
 
-g5 = WeightedGraph(
+g5 = Graph(
     [0, 1, 2, 3],
     [
         (0, 1, 1),
@@ -309,7 +309,7 @@ g5 = WeightedGraph(
 
 print(g5.bfs_shortest_path(0, 3))
 
-g6 = WeightedGraph(
+g6 = Graph(
     [0, 1, 2, 3],
     [(0, 1, 1), (2, 3, 1)],
     directed=True
@@ -317,7 +317,7 @@ g6 = WeightedGraph(
 
 # print(g6.bfs_shortest_path(0, 3))
 
-g7 = WeightedGraph(
+g7 = Graph(
     [0, 1, 2],
     [(0, 1, 1), (1, 2, 1)],
     directed=True
@@ -325,7 +325,7 @@ g7 = WeightedGraph(
 
 print(g7.bfs_shortest_path(1, 1))
 
-g8 = WeightedGraph(
+g8 = Graph(
     ["A", "B", "C", "D"],
     [
         ("A", "B", 1),
@@ -337,7 +337,7 @@ g8 = WeightedGraph(
 
 print(g8.bfs_shortest_path("C", "D"))
 
-g9 = WeightedGraph(
+g9 = Graph(
     ["A", "B", "C", "D", "E"],
     [
         ("A", "B", 1),
@@ -352,7 +352,7 @@ g9 = WeightedGraph(
 print(g9.dfs_path("A", "D"))
 print(g9.dfs_shortest_path("A", "D"))
 
-g10 = WeightedGraph(
+g10 = Graph(
     ["A", "B", "C", "D", "E", "F"],
     [
         ("A", "B", 1),
@@ -368,7 +368,7 @@ g10 = WeightedGraph(
 print(g10.dfs_path("A", "F"))
 print(g10.dfs_shortest_path("A", "F"))
 
-g11 = WeightedGraph(
+g11 = Graph(
     ["A", "B", "C", "D", "E"],
     [
         ("A", "B", 4),
@@ -383,7 +383,7 @@ g11 = WeightedGraph(
 
 print(g11.dag_shortest_path("A", "E"))
 
-g12 = WeightedGraph(
+g12 = Graph(
     ["A", "B", "C", "D", "E"],
     [
         ("A", "B", 10),
@@ -397,7 +397,7 @@ g12 = WeightedGraph(
 
 print(g12.dag_shortest_path("A", "D"))
 
-g13 = WeightedGraph(
+g13 = Graph(
     ["A", "B", "C", "D"],
     [
         ("A", "B", 2),
