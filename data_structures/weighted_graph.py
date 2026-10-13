@@ -20,8 +20,10 @@ class WeightedGraph:
     def __str__(self):
         return str(self.adj)  
 
-    # Time: O((V+E)logV)
+    # Time: extract min dist: O(VlogV) + push a new shorter edge: O(ElogV) = O((V+E)logV) For a connected graph, E >= V-1 so O(ElogV)
     def dijkstra(self, start):
+        """Single source shortest path, negative edges are not allowed."""
+
         if start not in self.vertices:
             raise ValueError("invalid starting vertex")
         
@@ -43,7 +45,10 @@ class WeightedGraph:
 
         return dist
     
+    # Time: O(VE) For a connected graph, E >= V-1 so O(E^2)
     def bellman_ford(self, start):
+        """Single source shortest path, negative edges allowed."""
+
         if start not in self.vertices:
             raise ValueError("invalid starting vertex")
         
@@ -76,6 +81,36 @@ class WeightedGraph:
 
         return dist
 
+    def floyd_warshall(self):
+        """All pairs shortest path."""
+        D = {v: {u: float('inf') for u in self.vertices} for v in self.vertices}
+
+        # D[i][j] = min ditance from vertex i to j either direct or through intermediate vertex k
+        # D[i][j]=min(D[i][j], D[i][k]+D[k][j])
+
+        for v in self.vertices:
+            D[v][v] = 0
+        
+        # intialize direct neighbors
+        for v in self.vertices:
+            for nei, w in self.adj[v]:
+                D[v][nei] = min(D[v][nei], w) # safely pick min in case of multiple edges
+
+        for k in self.vertices: # intermediate vertex
+            for i in self.vertices: # start vertex
+                for j in self.vertices: # end vertex
+                    if D[i][k] != float('inf') and D[k][j] != float('inf'):
+                        D[i][j] = min(D[i][j], D[i][k] + D[k][j])
+
+        for v in self.vertices:
+            if D[v][v] < 0: # negative cycle detected
+                raise ValueError("Negative weight cycle detected")
+            
+        return D
+
+
+    
+
 
 g = WeightedGraph(
     [0, 1, 2, 3, 4],
@@ -92,6 +127,7 @@ g = WeightedGraph(
 
 print(g.bellman_ford(0))
 print(g.dijkstra(0))
+print(g.floyd_warshall()[0][4])
 
 g2 = WeightedGraph(
     [0, 1, 2],
@@ -100,7 +136,8 @@ g2 = WeightedGraph(
 )
 
 print(g2.bellman_ford(0))
-print(g2.dijkstra(0))
+# print(g2.dijkstra(0))
+print(g2.floyd_warshall()[0][1])
 
 g3 = WeightedGraph(
     [0, 1, 2, 3],
@@ -113,5 +150,6 @@ g3 = WeightedGraph(
     directed=True
 )
 
-print(g3.bellman_ford(0))
-# print(g3.dijkstra(0)) # gets stuck in endless negative weight cycele
+# print(g3.bellman_ford(0))
+# # print(g3.dijkstra(0)) # gets stuck in endless negative weight cycle
+print(g3.floyd_warshall())
