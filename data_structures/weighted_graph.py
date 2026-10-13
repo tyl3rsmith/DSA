@@ -1,3 +1,4 @@
+from collections import deque
 import heapq
 
 class WeightedGraph:
@@ -107,7 +108,39 @@ class WeightedGraph:
                 raise ValueError("Negative weight cycle detected")
             
         return D
+    
+    def bfs_shortest_path(self, start, end):
+        if start not in self.vertices or end not in self.vertices:
+            raise ValueError("invalid vertex")
+        
+        dist = {v: float('inf') for v in self.vertices}
+        dist[start] = 0
 
+        queue = deque([start])
+        parent = {start: None}
+
+        while queue:
+            node = queue.popleft()
+
+            for nei, _ in self.adj[node]: # ignore weights
+                if dist[nei] == float('inf'): # haven't visited this neighbor yet
+                    queue.append(nei)
+                    dist[nei] = dist[node] + 1
+                    parent[nei] = node
+            
+        if dist[end] == float('inf'):
+            raise ValueError(f"End vertex: {end}, is unreachable")
+
+        # reconstruct the path bfs took
+        path = []
+        curr = end
+        while curr is not None:
+            path.append(curr)
+            curr = parent[curr]
+        
+        path.reverse()
+        return path, dist[end]
+        
 
     
 
@@ -152,4 +185,59 @@ g3 = WeightedGraph(
 
 # print(g3.bellman_ford(0))
 # # print(g3.dijkstra(0)) # gets stuck in endless negative weight cycle
-print(g3.floyd_warshall())
+# print(g3.floyd_warshall())
+
+g4 = WeightedGraph(
+    [0, 1, 2, 3, 4],
+    [
+        (0, 1, 1),
+        (0, 2, 1),
+        (1, 3, 1),
+        (2, 3, 1),
+        (3, 4, 1)
+    ],
+    directed=True
+)
+
+print(g4.bfs_shortest_path(0, 4))
+
+g5 = WeightedGraph(
+    [0, 1, 2, 3],
+    [
+        (0, 1, 1),
+        (1, 2, 1),
+        (2, 3, 1),
+        (0, 3, 1)
+    ],
+    directed=True
+)
+
+print(g5.bfs_shortest_path(0, 3))
+
+g6 = WeightedGraph(
+    [0, 1, 2, 3],
+    [(0, 1, 1), (2, 3, 1)],
+    directed=True
+)
+
+# print(g6.bfs_shortest_path(0, 3))
+
+g7 = WeightedGraph(
+    [0, 1, 2],
+    [(0, 1, 1), (1, 2, 1)],
+    directed=True
+)
+
+print(g7.bfs_shortest_path(1, 1))
+
+g8 = WeightedGraph(
+    ["A", "B", "C", "D"],
+    [
+        ("A", "B", 1),
+        ("B", "C", 1),
+        ("A", "D", 1)
+    ],
+    directed=False
+)
+
+print(g8.bfs_shortest_path("C", "D"))
