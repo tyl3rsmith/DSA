@@ -1,6 +1,8 @@
 from collections import deque
 import heapq
 
+from algorithms.topological_sort import topo_sort
+
 class WeightedGraph:
 
     def __init__(self, vertices, edges, directed=True):
@@ -110,6 +112,7 @@ class WeightedGraph:
         return D
     
     def bfs_shortest_path(self, start, end):
+        """Gives the shortest path from a start node to end node all edge weights are ingored and considered to be 1."""
         if start not in self.vertices or end not in self.vertices:
             raise ValueError("invalid vertex")
         
@@ -141,8 +144,100 @@ class WeightedGraph:
         path.reverse()
         return path, dist[end]
         
+    def dfs_path(self, start, end):
+        """finds a path and returns its number of edges may not be the minimum."""
+        if start not in self.vertices or end not in self.vertices:
+            raise ValueError("invalid vertex")
 
+        visited = set()
+        path = []
+
+        def explore(node):
+            visited.add(node)
+            path.append(node)
+
+            if node == end:
+                return True
+            
+            # recursively try each unvisited neighbor and propagate True when the destination is found.
+            for nei, _ in self.adj[node]:
+                if nei not in visited:
+                    if explore(nei):
+                        return True
+
+            # backtrack
+            path.pop()
+            
+            return False
     
+        if explore(start):
+            return path, len(path) - 1
+        else:
+            raise ValueError("No valid path")
+
+    def dfs_shortest_path(self, start, end):
+        """finds the shorest path and returns its number of edges"""
+        if start not in self.vertices or end not in self.vertices:
+            raise ValueError("invalid vertex")
+
+        visited = set()
+        path = []
+        best_path = None
+
+        def explore(node):
+            nonlocal best_path
+
+            visited.add(node)
+            path.append(node)
+
+            if node == end:
+                if best_path is None or len(path) < len(best_path):
+                    best_path = path[:]
+            
+            # recursively try each unvisited neighbor and propagate True when the destination is found.
+            for nei, _ in self.adj[node]:
+                if nei not in visited:
+                    explore(nei)
+
+            # backtrack
+            path.pop()
+            visited.remove(node)
+
+        explore(start)
+
+        if best_path:
+            return best_path, len(best_path) - 1
+        else:
+            raise ValueError("No valid path")  
+
+    def dag_shortest_path(self, start, end):
+        """Finds shortest path in a DAG."""
+        if start not in self.vertices or end not in self.vertices:
+            raise ValueError("invalid vertex")
+        
+        sorted_vertices = topo_sort(self.adj, self.vertices)
+        parent = {v: None for v in self.vertices}
+
+        dist = {v: float('inf') for v in self.vertices}
+        dist[start] = 0
+
+        for u in sorted_vertices:
+            for v, w in self.adj[u]:
+                if dist[u] != float('inf') and dist[u] + w < dist[v]:
+                    dist[v] = dist[u] + w
+                    parent[v] = u
+
+        if dist[end] == float('inf'):
+            raise ValueError("No valid path")
+        
+        path = []
+        curr = end
+        while curr is not None:
+            path.append(curr)
+            curr = parent[curr]
+        
+        path.reverse()
+        return path, dist[end]
 
 
 g = WeightedGraph(
@@ -241,3 +336,77 @@ g8 = WeightedGraph(
 )
 
 print(g8.bfs_shortest_path("C", "D"))
+
+g9 = WeightedGraph(
+    ["A", "B", "C", "D", "E"],
+    [
+        ("A", "B", 1),
+        ("A", "C", 1),
+        ("B", "D", 1),
+        ("C", "E", 1),
+        ("E", "D", 1)
+    ],
+    directed=True
+)
+
+print(g9.dfs_path("A", "D"))
+print(g9.dfs_shortest_path("A", "D"))
+
+g10 = WeightedGraph(
+    ["A", "B", "C", "D", "E", "F"],
+    [
+        ("A", "B", 1),
+        ("B", "C", 1),
+        ("C", "D", 1),
+        ("D", "E", 1),
+        ("E", "F", 1),
+        ("A", "F", 1)
+    ],
+    directed=True
+)
+
+print(g10.dfs_path("A", "F"))
+print(g10.dfs_shortest_path("A", "F"))
+
+g11 = WeightedGraph(
+    ["A", "B", "C", "D", "E"],
+    [
+        ("A", "B", 4),
+        ("A", "C", 2),
+        ("C", "B", -1),
+        ("B", "D", 3),
+        ("C", "D", 5),
+        ("D", "E", -2)
+    ],
+    directed=True
+)
+
+print(g11.dag_shortest_path("A", "E"))
+
+g12 = WeightedGraph(
+    ["A", "B", "C", "D", "E"],
+    [
+        ("A", "B", 10),
+        ("A", "C", 1),
+        ("B", "D", 1),
+        ("C", "E", 1),
+        ("E", "D", 1)
+    ],
+    directed=True
+)
+
+print(g12.dag_shortest_path("A", "D"))
+
+g13 = WeightedGraph(
+    ["A", "B", "C", "D"],
+    [
+        ("A", "B", 2),
+        ("A", "C", 5),
+        ("C", "B", -10),
+        ("B", "D", 3),
+        ("C", "D", 1)
+    ],
+    directed=True
+)
+
+print(g13.dag_shortest_path("A", "D"))
